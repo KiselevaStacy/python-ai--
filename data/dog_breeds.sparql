@@ -1,0 +1,36 @@
+# Извлекает данные о породах собак: страна происхождения, рост, масса и продолжительность жизни,
+# включая квалификаторы (например, minimum, maximum, male, female).
+# Uses Russian labels if available, otherwise falls back to English.
+
+SELECT DISTINCT ?dogBreed ?dogBreedLabel ?countryLabel
+                ?height ?heightQualifier
+                ?mass ?massQualifier
+                ?lifeExpectancy ?lifeExpectancyQualifier
+WHERE {
+  ?dogBreed wdt:P31 wd:Q39367;  # Фильтр: только породы собак
+            wdt:P495 ?country.  # Страна происхождения
+
+  # Рост с квалификатором
+  OPTIONAL {
+    ?dogBreed p:P2048 ?heightStatement.
+    ?heightStatement ps:P2048 ?height.
+    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. }
+  }
+
+  # Масса с квалификатором
+  OPTIONAL {
+    ?dogBreed p:P2067 ?massStatement.
+    ?massStatement ps:P2067 ?mass.
+    OPTIONAL { ?massStatement pq:P518 ?massQualifier. }
+  }
+
+  # Продолжительность жизни с квалификатором
+  OPTIONAL {
+    ?dogBreed p:P2250 ?lifeExpectancyStatement.
+    ?lifeExpectancyStatement ps:P2250 ?lifeExpectancy.
+    OPTIONAL { ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier. }
+  }
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }  # Метки на русском, если нет — на английском
+}
+ORDER BY DESC(?mass)
