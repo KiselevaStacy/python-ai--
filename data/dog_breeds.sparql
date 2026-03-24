@@ -1,36 +1,39 @@
-# Извлекает данные о породах собак: страна происхождения, рост, масса и продолжительность жизни,
-# включая квалификаторы (например, minimum, maximum, male, female).
-# Uses Russian labels if available, otherwise falls back to English.
-
+# Выбираем уникальные значения, чтобы не было дублей, если у собаки несколько стран или весов
 SELECT DISTINCT ?dogBreed ?dogBreedLabel ?countryLabel
-                ?height ?heightQualifier
-                ?mass ?massQualifier
-                ?lifeExpectancy ?lifeExpectancyQualifier
+                ?height ?heightQualifierLabel
+                ?mass ?massQualifierLabel
+                ?lifeExpectancy ?lifeExpectancyQualifierLabel
 WHERE {
-  ?dogBreed wdt:P31 wd:Q39367;  # Фильтр: только породы собак
-            wdt:P495 ?country.  # Страна происхождения
+  # Ищем сущности, которые являются "породой собаки" (Q39367)
+  ?dogBreed wdt:P31 wd:Q39367;
+            wdt:P495 ?country. # У которых указана страна происхождения
 
-  # Рост с квалификатором
+  # Блок РОСТА (P2048)
   OPTIONAL {
-    ?dogBreed p:P2048 ?heightStatement.
-    ?heightStatement ps:P2048 ?height.
-    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. }
+    ?dogBreed p:P2048 ?heightStatement.           # Переходим к утверждению о росте
+    ?heightStatement ps:P2048 ?height.            # Берем само число (обычно в см)
+    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. } # Уточнение (напр. "в холке")
   }
 
-  # Масса с квалификатором
+  # Блок МАССЫ (P2067) — тут происходит магия конвертации в КГ
   OPTIONAL {
     ?dogBreed p:P2067 ?massStatement.
-    ?massStatement ps:P2067 ?mass.
-    OPTIONAL { ?massStatement pq:P518 ?massQualifier. }
+    # psn (Physical Standard Value) сразу лезет в нормализованные данные.
+    # [ wikibase:quantityAmount ?mass ] вытягивает число, приведенное к СИ (кг)
+    ?massStatement psn:P2067 [
+      wikibase:quantityAmount ?mass
+    ].
+    OPTIONAL { ?massStatement pq:P518 ?massQualifier. } # Уточнение (напр. "для самцов")
   }
 
-  # Продолжительность жизни с квалификатором
+  # Блок ПРОДОЛЖИТЕЛЬНОСТИ ЖИЗНИ (P2250)
   OPTIONAL {
     ?dogBreed p:P2250 ?lifeExpectancyStatement.
-    ?lifeExpectancyStatement ps:P2250 ?lifeExpectancy.
+    ?lifeExpectancyStatement ps:P2250 ?lifeExpectancy. # Средний срок жизни (в годах)
     OPTIONAL { ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier. }
   }
 
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }  # Метки на русском, если нет — на английском
+  # Сервис меток: берет названия (Label) для всех ID. 
+  # Сначала ищет на русском, если нет — на английском.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
 }
-ORDER BY DESC(?mass)
