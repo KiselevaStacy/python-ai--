@@ -1,21 +1,21 @@
-# Выбираем уникальные значения, чтобы не было дублей, если у собаки несколько стран или весов
+# Извлекает данные о породах собак: страна происхождения, рост, масса (в килограммах) и продолжительность жизни, включая квалификаторы (например, минимум, максимум, самец, самка).
 SELECT DISTINCT ?dogBreed ?dogBreedLabel ?countryLabel
                 ?height ?heightQualifierLabel
                 ?mass ?massQualifierLabel
                 ?lifeExpectancy ?lifeExpectancyQualifierLabel
 WHERE {
-  # Ищем сущности, которые являются "породой собаки" (Q39367)
+  # Фильтр: только породы собак
   ?dogBreed wdt:P31 wd:Q39367;
-            wdt:P495 ?country. # У которых указана страна происхождения
+            wdt:P495 ?country. # Страна происхождения
 
-  # Блок РОСТА (P2048)
+  # Рост с квалификатором
   OPTIONAL {
-    ?dogBreed p:P2048 ?heightStatement.           # Переходим к утверждению о росте
-    ?heightStatement ps:P2048 ?height.            # Берем само число (обычно в см)
-    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. } # Уточнение (напр. "в холке")
+    ?dogBreed p:P2048 ?heightStatement.           
+    ?heightStatement ps:P2048 ?height.            
+    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. } 
   }
 
-  # Блок МАССЫ (P2067) — тут происходит магия конвертации в КГ
+  # Масса с квалификатором (конвертация в килограммы через psn)
   OPTIONAL {
     ?dogBreed p:P2067 ?massStatement.
     # psn (Physical Standard Value) сразу лезет в нормализованные данные.
@@ -23,17 +23,16 @@ WHERE {
     ?massStatement psn:P2067 [
       wikibase:quantityAmount ?mass
     ].
-    OPTIONAL { ?massStatement pq:P518 ?massQualifier. } # Уточнение (напр. "для самцов")
+    OPTIONAL { ?massStatement pq:P518 ?massQualifier. } 
   }
 
-  # Блок ПРОДОЛЖИТЕЛЬНОСТИ ЖИЗНИ (P2250)
+  # Продолжительность жизни с квалификатором
   OPTIONAL {
     ?dogBreed p:P2250 ?lifeExpectancyStatement.
     ?lifeExpectancyStatement ps:P2250 ?lifeExpectancy. # Средний срок жизни (в годах)
     OPTIONAL { ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier. }
   }
 
-  # Сервис меток: берет названия (Label) для всех ID. 
-  # Сначала ищет на русском, если нет — на английском.
+  # Метки на русском, если нет — на английском
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
 }
