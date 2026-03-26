@@ -5,4 +5,5 @@ WHERE {
   ?dogBreed wdt:P31 wd:Q39367.   # только породы собак
   ?dogBreed wdt:P18 ?image.       # изображение на Викискладе
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,de,mul". }
+}  # ← Закрывающая скобка для WHERE
 ORDER BY ?dogBreedLabel
