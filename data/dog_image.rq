@@ -1,0 +1,9 @@
+# Извлекает изображения пород собак с Викисклада (свойство P18).
+# Extracts dog breed images from Wikimedia Commons (property P18).
+SELECT DISTINCT ?dogBreed ?dogBreedLabel ?image
+WHERE {
+  ?dogBreed wdt:P31 wd:Q39367.   # только породы собак
+  ?dogBreed wdt:P18 ?image.       # изображение на Викискладе
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,mul". }
+}
+ORDER BY ?dogBreedLabel
