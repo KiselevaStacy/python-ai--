@@ -12,7 +12,11 @@ WHERE {
   OPTIONAL {
     ?dogBreed p:P2048 ?heightStatement.           
     ?heightStatement ps:P2048 ?height.            
-    OPTIONAL { ?heightStatement pq:P518 ?heightQualifier. } 
+    OPTIONAL { 
+      ?heightStatement pq:P518 ?heightQualifier. 
+      ?heightQualifier rdfs:label ?heightQualifierLabel.
+      FILTER(LANG(?heightQualifierLabel) = "ru")
+    } 
   }
 
   # Масса с квалификатором (конвертация в килограммы через psn)
@@ -23,15 +27,26 @@ WHERE {
     ?massStatement psn:P2067 [
       wikibase:quantityAmount ?mass
     ].
-    OPTIONAL { ?massStatement pq:P518 ?massQualifier. } 
+    OPTIONAL { 
+      ?massStatement pq:P518 ?massQualifier. 
+      ?massQualifier rdfs:label ?massQualifierLabel.
+      FILTER(LANG(?massQualifierLabel) = "ru")
+    } 
   }
 
   # Продолжительность жизни с квалификатором
   OPTIONAL {
     ?dogBreed p:P2250 ?lifeExpectancyStatement.
     ?lifeExpectancyStatement ps:P2250 ?lifeExpectancy. # Средний срок жизни (в годах)
-    OPTIONAL { ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier. }
+    OPTIONAL { 
+      ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier.
+      ?lifeExpectancyQualifier rdfs:label ?lifeExpectancyQualifierLabel.
+      FILTER(LANG(?lifeExpectancyQualifierLabel) = "ru")
+    }
   }
 
   # Метки на русском, если нет — на английском
-SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,de,mul". }
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "ru,en,de,mul". 
+  }
+}
