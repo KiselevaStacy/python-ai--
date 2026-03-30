@@ -4,6 +4,10 @@ SELECT DISTINCT ?dogBreed ?dogBreedLabel ?image
 WHERE {
   ?dogBreed wdt:P31 wd:Q39367.   # только породы собак
   ?dogBreed wdt:P18 ?image.       # изображение на Викискладе
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,de,mul". }
-}  # ← Закрывающая скобка для WHERE
+  
+  # Метки на множестве языков (покрывает все породы)
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "ru,en,de,fr,es,it,pt,nl,sv,pl,ja,zh,ko,mul". 
+  }
+}
 ORDER BY ?dogBreedLabel
