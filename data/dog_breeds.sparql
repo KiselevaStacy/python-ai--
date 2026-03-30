@@ -33,8 +33,8 @@ WHERE {
     OPTIONAL { ?lifeExpectancyStatement pq:P518 ?lifeExpectancyQualifier. }
   }
 
-  # Метки на русском, если нет — на английском
+  # Метки на множестве языков (покрывает все породы)
   SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "ru,en,de,mul". 
+    bd:serviceParam wikibase:language "ru,en,de,fr,es,it,pt,nl,sv,pl,ja,zh,ko,mul". 
   }
 }
